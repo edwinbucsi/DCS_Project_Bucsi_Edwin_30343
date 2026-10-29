@@ -26,21 +26,32 @@ public class Lane2 {
         pn.NetworkPort = 1082;
 
         FLRS flrsMove = new FLRS(new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL));
+        FLRS flrsAdder = new FLRS(
+                new FV(FZ.NL), new FV(FZ.NL), new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR),
+                new FV(FZ.NL), new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM),
+                new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
+                new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL), new FV(FZ.PL),
+                new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL), new FV(FZ.PL), new FV(FZ.PL)
+        );
 
         Fuzzy greenSignal = new Fuzzy(0.0F);
 
-        DataFuzzy p_i = new DataFuzzy();
-        p_i.SetName("P_i");
-        p_i.SetValue(new Fuzzy(0.3F));
-        pn.PlaceList.add(p_i);
+        DataFuzzy p_r = new DataFuzzy();
+        p_r.SetName("P_R");
+        p_r.SetValue(new Fuzzy(0.0F));
+        pn.PlaceList.add(p_r);
 
-        DataFuzzy p_l = new DataFuzzy();
-        p_l.SetName("P_l");
-        pn.PlaceList.add(p_l);
+        DataFuzzy p_st = new DataFuzzy();
+        p_st.SetName("P_st");
+        pn.PlaceList.add(p_st);
 
         DataFuzzy lane2 = new DataFuzzy();
         lane2.SetName("lane2");
         pn.PlaceList.add(lane2);
+
+        DataFuzzy lane2_ = new DataFuzzy();
+        lane2_.SetName("lane2_");
+        pn.PlaceList.add(lane2_);
 
         DataFuzzy p_tl = new DataFuzzy();
         p_tl.SetName("P_TL");
@@ -61,61 +72,66 @@ public class Lane2 {
         p_o2.SetName("P_o2");
         pn.PlaceList.add(p_o2);
 
-        DataFuzzy p_exit2 = new DataFuzzy();
+        DataTransfer p_exit2 = new DataTransfer();
         p_exit2.SetName("P_Exit2");
+        p_exit2.Value = new TransferOperation("localhost", "1085", "P_i1");
         pn.PlaceList.add(p_exit2);
 
-        PetriTransition t_in = new PetriTransition(pn);
-        t_in.TransitionName = "t_in";
-        t_in.InputPlaceName.add("P_i");
+        PetriTransition t_add = new PetriTransition(pn);
+        t_add.TransitionName = "t_add";
+        t_add.InputPlaceName.add("P_R");
+        t_add.InputPlaceName.add("P_st");
 
-        Condition tinCt1 = new Condition(t_in, "P_i", TransitionCondition.NotNull);
-        GuardMapping grdTin = new GuardMapping();
-        grdTin.condition = tinCt1;
+        Condition tAddCt1 = new Condition(t_add, "P_R", TransitionCondition.NotNull);
+        Condition tAddCt2 = new Condition(t_add, "P_st", TransitionCondition.NotNull);
+        tAddCt1.SetNextCondition(LogicConnector.AND, tAddCt2);
 
-        ArrayList<PlaceNameWithWeight> inputTin = new ArrayList<>();
-        inputTin.add(new PlaceNameWithWeight("P_i", 1F));
+        GuardMapping grdTadd = new GuardMapping();
+        grdTadd.condition = tAddCt1;
 
-        ArrayList<String> outputTin = new ArrayList<>();
-        outputTin.add("P_l");
+        ArrayList<PlaceNameWithWeight> inputTadd = new ArrayList<>();
+        inputTadd.add(new PlaceNameWithWeight("P_R", 1F));
+        inputTadd.add(new PlaceNameWithWeight("P_st", 1F));
 
-        grdTin.Activations.add(new Activation(t_in, flrsMove, inputTin, TransitionOperation.FLRS, outputTin));
-        t_in.GuardMappingList.add(grdTin);
-        t_in.Delay = 0;
-        pn.Transitions.add(t_in);
+        ArrayList<String> outputTadd = new ArrayList<>();
+        outputTadd.add("lane2");
 
-        PetriTransition t_send = new PetriTransition(pn);
-        t_send.TransitionName = "t_send";
-        t_send.InputPlaceName.add("P_l");
+        grdTadd.Activations.add(new Activation(t_add, flrsAdder, inputTadd, TransitionOperation.FLRS, outputTadd));
+        t_add.GuardMappingList.add(grdTadd);
+        t_add.Delay = 0;
+        pn.Transitions.add(t_add);
 
-        Condition tsendCt1 = new Condition(t_send, "P_l", TransitionCondition.NotNull);
-        GuardMapping grdTsend = new GuardMapping();
-        grdTsend.condition = tsendCt1;
+        PetriTransition t_move = new PetriTransition(pn);
+        t_move.TransitionName = "t_move";
+        t_move.InputPlaceName.add("lane2");
 
-        ArrayList<PlaceNameWithWeight> inputTsend = new ArrayList<>();
-        inputTsend.add(new PlaceNameWithWeight("P_l", 1F));
+        Condition tMoveCt = new Condition(t_move, "lane2", TransitionCondition.NotNull);
+        GuardMapping grdTmove = new GuardMapping();
+        grdTmove.condition = tMoveCt;
 
-        ArrayList<String> outputTsend = new ArrayList<>();
-        outputTsend.add("lane2");
+        ArrayList<PlaceNameWithWeight> inputTmove = new ArrayList<>();
+        inputTmove.add(new PlaceNameWithWeight("lane2", 1F));
+        ArrayList<String> outputTmove = new ArrayList<>();
+        outputTmove.add("lane2_");
 
-        grdTsend.Activations.add(new Activation(t_send, flrsMove, inputTsend, TransitionOperation.FLRS, outputTsend));
-        t_send.GuardMappingList.add(grdTsend);
-        t_send.Delay = 0;
-        pn.Transitions.add(t_send);
+        grdTmove.Activations.add(new Activation(t_move, flrsMove, inputTmove, TransitionOperation.FLRS, outputTmove));
+        t_move.GuardMappingList.add(grdTmove);
+        t_move.Delay = 0;
+        pn.Transitions.add(t_move);
 
         PetriTransition t_out = new PetriTransition(pn);
         t_out.TransitionName = "t_out";
-        t_out.InputPlaceName.add("lane2");
+        t_out.InputPlaceName.add("lane2_");
         t_out.InputPlaceName.add("P_TL");
 
-        Condition toutCt1 = new Condition(t_out, "lane2", TransitionCondition.NotNull);
+        Condition toutCt1 = new Condition(t_out, "lane2_", TransitionCondition.NotNull);
         Condition toutCt2 = new Condition(t_out, "P_TL", TransitionCondition.Equal, "Green");
         toutCt1.SetNextCondition(LogicConnector.AND, toutCt2);
 
         GuardMapping grdTout = new GuardMapping();
         grdTout.condition = toutCt1;
 
-        grdTout.Activations.add(new Activation(t_out, "lane2", TransitionOperation.SendOverNetwork, "P_out"));
+        grdTout.Activations.add(new Activation(t_out, "lane2_", TransitionOperation.SendOverNetwork, "P_out"));
         grdTout.Activations.add(new Activation(t_out, "P_TL", TransitionOperation.Move, "P_TL"));
 
         t_out.GuardMappingList.add(grdTout);
@@ -129,21 +145,14 @@ public class Lane2 {
         Condition t1Ct1 = new Condition(t_1, "P_o2", TransitionCondition.NotNull);
         GuardMapping grdT1 = new GuardMapping();
         grdT1.condition = t1Ct1;
+        grdT1.Activations.add(new Activation(t_1, "P_o2", TransitionOperation.SendOverNetwork, "P_Exit2"));
 
-        ArrayList<PlaceNameWithWeight> inputT1 = new ArrayList<>();
-        inputT1.add(new PlaceNameWithWeight("P_o2", 1F));
-
-        ArrayList<String> outputT1 = new ArrayList<>();
-        outputT1.add("P_Exit2");
-
-        grdT1.Activations.add(new Activation(t_1, flrsMove, inputT1, TransitionOperation.FLRS, outputT1));
         t_1.GuardMappingList.add(grdT1);
         t_1.Delay = 0;
         pn.Transitions.add(t_1);
 
-        System.out.println("Lane 2 started \n ------------------------------");
+        System.out.println("Lane 2 Modified started \n ------------------------------");
         pn.Delay = 3000;
-
         PetriNetWindow frame = new PetriNetWindow(false);
         frame.petriNet = pn;
         frame.setVisible(true);

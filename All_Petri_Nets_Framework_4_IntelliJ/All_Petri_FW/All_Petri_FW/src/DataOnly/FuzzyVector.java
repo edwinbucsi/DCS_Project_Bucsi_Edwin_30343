@@ -50,7 +50,7 @@ public class FuzzyVector implements Serializable {
 		Values.add(new FuzzyVectorValue(FZ.ZR, 0f));
 		Values.add(new FuzzyVectorValue(FZ.PM, 0f));
 		Values.add(new FuzzyVectorValue(FZ.PL, 0f));
-		
+
 		if (v == -1F) {
 			FuzzyVectorValue val = Values.stream().filter((x) -> x.Zone == FZ.NL).findFirst().orElse(null);
 
@@ -137,19 +137,29 @@ public class FuzzyVector implements Serializable {
 
 			return;
 		}
-		
+
 		if (v > 1F) {
 			FuzzyVectorValue val = Values.stream().filter((x) -> x.Zone == FZ.PL).findFirst().orElse(null);
 
 			val.Value = 1f;
 			return;
 		}
-		
+
 		if (v < -1F) {
 			FuzzyVectorValue val = Values.stream().filter((x) -> x.Zone == FZ.NL).findFirst().orElse(null);
 
 			val.Value = 1f;
 			return;
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof FuzzyVector))
+			return false;
+		FuzzyVector Temp = ((FuzzyVector) o);
+		if (!Temp.toString().equals( this.toString()))
+			return false;
+		return true;
 	}
 }
