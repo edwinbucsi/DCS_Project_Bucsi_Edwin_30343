@@ -40,12 +40,12 @@ public class Roundabout {
 
         DataFuzzy p_i2 = new DataFuzzy();
         p_i2.SetName("P_i2");
-        p_i2.SetValue(new Fuzzy(0.3F));
+       // p_i2.SetValue(new Fuzzy(0.3F));
         pn.PlaceList.add(p_i2);
 
         DataFuzzy p_i3 = new DataFuzzy();
         p_i3.SetName("P_i3");
-        p_i3.SetValue(new Fuzzy(0.3F));
+     //   p_i3.SetValue(new Fuzzy(0.3F));
         pn.PlaceList.add(p_i3);
 
         DataFuzzy l1 = new DataFuzzy();

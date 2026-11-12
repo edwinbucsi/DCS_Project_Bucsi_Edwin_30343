@@ -38,7 +38,7 @@ public class Lane2 {
 
         DataFuzzy p_r = new DataFuzzy();
         p_r.SetName("P_R");
-        p_r.SetValue(new Fuzzy(0.0F));
+       // p_r.SetValue(new Fuzzy(0.0F));
         pn.PlaceList.add(p_r);
 
         DataFuzzy p_st = new DataFuzzy();
